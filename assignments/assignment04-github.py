@@ -2,34 +2,34 @@ from github import Github
 import requests
 from config import config as cfg
 
-# Load API key securely from config
+# Get GitHub API key from config
 apikey = cfg["githubkey"]
 g = Github(apikey)
 
-# Set repo and file details
-repo_name = "coughlo93/WSAA-coursework"
+# Connect to the repository
+repo = g.get_repo("coughlo93/WSAA-coursework")
+
+# Path to the file to edit
 file_path = "assignments/test.txt"
-replacement_name = "Owen"  # Replace "Andrew" with your name
 
-# Get the repository
-repo = g.get_repo(repo_name)
-
-# Get the file content
+# Get the file info and its contents
 file_info = repo.get_contents(file_path)
-download_url = file_info.download_url
-response = requests.get(download_url)
+url = file_info.download_url
+response = requests.get(url)
 content = response.text
 
-# Replace "Andrew" with your name
-updated_content = content.replace("Andrew", replacement_name)
+# Replace "Andrew" with "Owen"
+updated_content = content.replace("Andrew", "Owen")
 
-# Commit and push the updated file
-commit_message = "Replaced 'Andrew' with 'Owen' using script"
-repo.update_file(
-    file_info.path, 
-    commit_message, 
-    updated_content, 
-    file_info.sha
+# Commit the updated file
+commit_message = "Replaced 'Andrew' with 'Owen' via script"
+update_response = repo.update_file(
+    path=file_path,
+    message=commit_message,
+    content=updated_content,
+    sha=file_info.sha
 )
 
-print("✅ File updated and pushed to GitHub.")
+# Optional print for confirmation
+print("File updated:", update_response["content"].path)
+print("Commit SHA:", update_response["commit"].sha)
